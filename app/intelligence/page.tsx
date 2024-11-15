@@ -5,10 +5,11 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Database } from '@/lib/supabase/types';
+import { createClient } from '@/lib/supabase/client'
 
 export default function IntelligencePage() {
   const [data, setData] = useState<any[]>([]);
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchIntelligence = async () => {

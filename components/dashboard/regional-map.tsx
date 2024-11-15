@@ -27,6 +27,8 @@ type ThreatLocation = {
   affected_regions: string[];
 };
 
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
 export default function RegionalMap() {
   const [threats, setThreats] = useState<ThreatLocation[]>([]);
   const [selectedThreat, setSelectedThreat] = useState<ThreatLocation | null>(null);
@@ -89,6 +91,21 @@ export default function RegionalMap() {
     }
   };
 
+  if (!MAPBOX_TOKEN) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Regional Threat Map</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px] flex items-center justify-center">
+            <p>Mapbox token not configured</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -140,7 +157,7 @@ export default function RegionalMap() {
             {...viewState}
             onMove={evt => setViewState(evt.viewState)}
             mapStyle="mapbox://styles/mapbox/dark-v11"
-            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+            mapboxAccessToken={MAPBOX_TOKEN}
           >
             <NavigationControl position="top-right" />
             <FullscreenControl position="top-right" />

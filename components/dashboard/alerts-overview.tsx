@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -11,7 +11,7 @@ type Alert = Database['public']['Tables']['alerts']['Row'];
 
 export default function AlertsOverview() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createClient()
 
   useEffect(() => {
     const fetchAlerts = async () => {

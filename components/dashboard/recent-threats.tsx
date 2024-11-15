@@ -7,12 +7,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Database } from '@/lib/supabase/types';
 import { format } from 'date-fns';
+import { createClient } from '@/lib/supabase/client'
 
 type ThreatPattern = Database['public']['Tables']['threat_patterns']['Row'];
 
 export default function RecentThreats() {
   const [threats, setThreats] = useState<ThreatPattern[]>([]);
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchThreats = async () => {

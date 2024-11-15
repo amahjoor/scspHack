@@ -10,21 +10,36 @@ export const revalidate = 0;
 async function getStats() {
   const supabase = createClient();
   
-  const [alertsCount, threatCount, regionsCount] = await Promise.all([
-    supabase.from('alerts')
-      .select('*', { count: 'exact' })
-      .eq('status', 'active'),
-    supabase.from('threat_patterns')
-      .select('*', { count: 'exact' }),
-    supabase.from('osint_sources')
-      .select('affected_regions', { count: 'exact' }),
-  ]);
+  try {
+    const { count: alertsCount } = await supabase
+      .from('alerts')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active')
+      .single();
 
-  return {
-    activeAlerts: alertsCount.count || 0,
-    totalThreats: threatCount.count || 0,
-    monitoredRegions: regionsCount.count || 0,
-  };
+    const { count: threatCount } = await supabase
+      .from('threat_patterns')
+      .select('*', { count: 'exact', head: true })
+      .single();
+
+    const { count: regionsCount } = await supabase
+      .from('osint_sources')
+      .select('*', { count: 'exact', head: true })
+      .single();
+
+    return {
+      activeAlerts: alertsCount ?? 0,
+      totalThreats: threatCount ?? 0,
+      monitoredRegions: regionsCount ?? 0,
+    };
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    return {
+      activeAlerts: 0,
+      totalThreats: 0,
+      monitoredRegions: 0
+    };
+  }
 }
 
 export default async function DashboardPage() {

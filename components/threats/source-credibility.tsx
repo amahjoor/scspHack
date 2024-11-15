@@ -1,4 +1,4 @@
-import { OSINTSource } from '@/lib/types';
+import { OSINTSource } from '@/lib/supabase/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 

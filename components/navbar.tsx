@@ -31,7 +31,8 @@ const Navigation: React.FC<NavigationProps> = ({ children }) => {
   const navItems = [
     { href: '/dashboard', icon: Home, label: 'Dashboard' },
     { href: '/threats', icon: AlertTriangle, label: 'Threats' },
-    { href: '/intelligence', icon: TrendingUp, label: 'Intelligence' },
+    { href: '/trends', icon: TrendingUp, label: 'Trends' },
+    { href: '/intelligence', icon: FileText, label: 'Intelligence' },
     { href: '/sources', icon: FileText, label: 'Sources' },
     { href: '/map', icon: Map, label: 'Global Map' }
   ];

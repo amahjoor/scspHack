@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { ThreatPattern } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client'
+import { ThreatPattern } from '@/lib/supabase/types'
 import { ThreatCard } from './threat-card';
 
 export function ThreatList() {
   const [threats, setThreats] = useState<ThreatPattern[]>([]);
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchThreats = async () => {

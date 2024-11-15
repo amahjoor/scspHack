@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Database } from '@/lib/supabase/types';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { createClient } from '@/lib/supabase/client'
 
 export default function ThreatTrends() {
   const [data, setData] = useState<{ date: string; threats: number; }[]>([]);
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchThreats = async () => {
