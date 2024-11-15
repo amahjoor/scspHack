@@ -8,8 +8,8 @@ import NavigationWrapper from '@/components/navwrapper';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Foodborne Outbreak Monitor',
-  description: 'Track and analyze foodborne illness outbreaks in real-time',
+  title: 'Global OSINT Monitor',
+  description: 'Track and analyze global threats using AI-powered OSINT monitoring'
 };
 
 export default function RootLayout({

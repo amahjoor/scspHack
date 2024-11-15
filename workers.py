@@ -66,6 +66,27 @@ class AlertsResponse(BaseModel):
     """Container for list of alerts"""
     alerts: List[FoodSafetyAlert]
 
+class OSINTSource(BaseModel):
+    source_type: Literal["social_media", "news", "government", "technical"]
+    credibility: Literal["low", "medium", "high"]
+    language: str
+    content: str
+    metadata: Dict[str, Any]
+
+class ThreatPattern(BaseModel):
+    threat_type: Literal["disinformation", "cyber", "physical", "economic"]
+    confidence: float
+    severity: Literal["low", "medium", "high", "critical"]
+    sources: List[OSINTSource]
+    analysis: str
+
+class ThreatAlert(BaseModel):
+    alert_type: Literal["emerging", "active", "resolved"]
+    severity: Literal["low", "medium", "high", "critical"]
+    threat_patterns: List[ThreatPattern]
+    affected_regions: List[str]
+    recommendations: str
+
 @dataclass
 class ModelConfig:
     model: str
@@ -222,20 +243,13 @@ class AIWorker:
             print(f"Error in AI processing: {str(e)}")
             raise
 
-class FoodSafetyPipeline:
+class OSINTMonitoringPipeline:
     def __init__(self, supabase_url: str, supabase_key: str, openai_client: OpenAI):
         self.supabase = SupabaseConnector(supabase_url, supabase_key)
         
-        # Initialize AI workers with fallback to older model if needed
-        base_model = "gpt-4-turbo"  # Fallback to older model name
-        try:
-            # Try to verify if gpt-4o model is available
-            openai_client.models.retrieve("gpt-4o-2024-08-06")
-            base_model = "gpt-4o-2024-08-06"
-        except:
-            print("Using fallback model gpt-4-turbo")
+        base_model = "gpt-4-turbo"
         
-        self.pattern_analyzer = AIWorker(
+        self.source_analyzer = AIWorker(
             ModelConfig(
                 model=base_model,
                 temperature=0.3,
@@ -245,7 +259,7 @@ class FoodSafetyPipeline:
             openai_client
         )
         
-        self.risk_assessor = AIWorker(
+        self.threat_analyzer = AIWorker(
             ModelConfig(
                 model=base_model,
                 temperature=0.2,
@@ -255,82 +269,15 @@ class FoodSafetyPipeline:
             openai_client
         )
         
-        self.alert_generator = AIWorker(
+        self.narrative_analyzer = AIWorker(
             ModelConfig(
                 model=base_model,
                 temperature=0.1,
-                max_tokens=1000,
+                max_tokens=3000,
                 cost_per_1k_tokens=0.01
             ),
             openai_client
         )
-
-    async def analyze_patterns(self, cases_data: List[Dict]) -> PatternAnalysis:
-        """Step 1: Analyze patterns in recent cases"""
-        system_prompt = """
-        Analyze food safety incident patterns from the provided cases and establishments data.
-        Focus on symptom clusters, geographic patterns, temporal patterns, and common food items.
-        """
-        
-        return await self.pattern_analyzer.process_with_schema(
-            cases_data,
-            system_prompt,
-            PatternAnalysis
-        )
-
-    async def assess_risk(self, pattern_analysis: PatternAnalysis) -> RiskAssessment:
-        """Step 2: Assess risks based on pattern analysis"""
-        system_prompt = """
-        Evaluate food safety risks based on the pattern analysis.
-        Consider symptom severity, geographic spread, rate of new cases, and population impact.
-        """
-        
-        return await self.risk_assessor.process_with_schema(
-            pattern_analysis.model_dump(),
-            system_prompt,
-            RiskAssessment
-        )
-
-    async def generate_alerts(self, risk_assessment: RiskAssessment) -> List[FoodSafetyAlert]:
-        """Step 3: Generate alerts matching the Supabase schema"""
-        # Include valid establishment IDs in the prompt
-        valid_ids_str = ", ".join(map(str, self.supabase.valid_establishment_ids))
-        
-        system_prompt = f"""
-        Generate food safety alerts based on the risk assessment.
-        
-        IMPORTANT: You must ONLY use establishment IDs from this list of valid IDs: {valid_ids_str}
-        
-        Each alert in the response must include:
-        1. establishment_id: MUST be one of the valid IDs listed above
-        2. alert_type: Either "OUTBREAK", "INSPECTION", or "VIOLATION"
-        3. severity: Either "low", "medium", "high", or "critical"
-        4. case_count: The number of cases associated with this alert
-        5. details: A clear description of the issue and recommended actions
-        
-        The response must be a JSON object containing an "alerts" array of alert objects.
-        All establishment_ids must come from the provided list of valid IDs.
-        """
-        
-        result = await self.alert_generator.process_with_schema(
-            risk_assessment.model_dump(),
-            system_prompt,
-            AlertsResponse
-        )
-        return result.alerts
-
-    def get_cost_report(self) -> Dict[str, float]:
-        """Generate detailed cost report"""
-        return {
-            "pattern_analysis_cost": self.pattern_analyzer.get_cost(),
-            "risk_assessment_cost": self.risk_assessor.get_cost(),
-            "alert_generation_cost": self.alert_generator.get_cost(),
-            "total_cost": (
-                self.pattern_analyzer.get_cost() +
-                self.risk_assessor.get_cost() +
-                self.alert_generator.get_cost()
-            )
-        }
 
 async def main():
     SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
@@ -340,7 +287,7 @@ async def main():
         raise EnvironmentError("Missing required environment variables")
     
     openai_client = OpenAI()
-    pipeline = FoodSafetyPipeline(SUPABASE_URL, SUPABASE_KEY, openai_client)
+    pipeline = OSINTMonitoringPipeline(SUPABASE_URL, SUPABASE_KEY, openai_client)
     
     try:
         print("Fetching recent cases...")

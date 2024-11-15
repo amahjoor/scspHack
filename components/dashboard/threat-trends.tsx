@@ -7,45 +7,43 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Database } from '@/lib/supabase/types';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
-// type Case = Database['public']['Tables']['cases']['Row'];
-
-export default function CasesTrend() {
-  const [data, setData] = useState<{ date: string; cases: number; }[]>([]);
+export default function ThreatTrends() {
+  const [data, setData] = useState<{ date: string; threats: number; }[]>([]);
   const supabase = createClientComponentClient<Database>();
 
   useEffect(() => {
-    const fetchCases = async () => {
+    const fetchThreats = async () => {
       const endDate = new Date();
       const startDate = subMonths(endDate, 6);
 
-      const { data: cases } = await supabase
-        .from('cases')
-        .select('report_date, patient_count')
-        .gte('report_date', startOfMonth(startDate).toISOString())
-        .lte('report_date', endOfMonth(endDate).toISOString());
+      const { data: threats } = await supabase
+        .from('threat_patterns')
+        .select('created_at')
+        .gte('created_at', startOfMonth(startDate).toISOString())
+        .lte('created_at', endOfMonth(endDate).toISOString());
 
-      if (cases) {
-        const monthlyData = cases.reduce((acc, curr) => {
-          const month = format(new Date(curr.report_date), 'yyyy-MM');
-          acc[month] = (acc[month] || 0) + (curr.patient_count || 1);
+      if (threats) {
+        const monthlyData = threats.reduce((acc, curr) => {
+          const month = format(new Date(curr.created_at), 'yyyy-MM');
+          acc[month] = (acc[month] || 0) + 1;
           return acc;
         }, {} as Record<string, number>);
 
-        const formattedData = Object.entries(monthlyData).map(([date, cases]) => ({
+        const formattedData = Object.entries(monthlyData).map(([date, threats]) => ({
           date,
-          cases,
+          threats,
         }));
 
         setData(formattedData);
       }
     };
 
-    fetchCases();
+    fetchThreats();
 
     const channel = supabase
-      .channel('cases-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cases' }, () => {
-        fetchCases();
+      .channel('threat-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'threat_patterns' }, () => {
+        fetchThreats();
       })
       .subscribe();
 
@@ -57,7 +55,7 @@ export default function CasesTrend() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cases Trend</CardTitle>
+        <CardTitle>Threat Trends</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -69,7 +67,7 @@ export default function CasesTrend() {
               <Tooltip />
               <Line 
                 type="monotone" 
-                dataKey="cases" 
+                dataKey="threats" 
                 stroke="hsl(var(--primary))" 
                 strokeWidth={2}
               />

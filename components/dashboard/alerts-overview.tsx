@@ -17,7 +17,8 @@ export default function AlertsOverview() {
     const fetchAlerts = async () => {
       const { data } = await supabase
         .from('alerts')
-        .select('*, establishments(*)')
+        .select('*')
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(3);
 

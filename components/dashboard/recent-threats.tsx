@@ -8,31 +8,29 @@ import { Badge } from "@/components/ui/badge";
 import { Database } from '@/lib/supabase/types';
 import { format } from 'date-fns';
 
-type Case = Database['public']['Tables']['cases']['Row'] & {
-  establishments: Database['public']['Tables']['establishments']['Row'] | null;
-};
+type ThreatPattern = Database['public']['Tables']['threat_patterns']['Row'];
 
-export default function RecentCases() {
-  const [cases, setCases] = useState<Case[]>([]);
+export default function RecentThreats() {
+  const [threats, setThreats] = useState<ThreatPattern[]>([]);
   const supabase = createClientComponentClient<Database>();
 
   useEffect(() => {
-    const fetchCases = async () => {
+    const fetchThreats = async () => {
       const { data } = await supabase
-        .from('cases')
-        .select('*, establishments(*)')
-        .order('report_date', { ascending: false })
+        .from('threat_patterns')
+        .select('*')
+        .order('created_at', { ascending: false })
         .limit(10);
 
-      if (data) setCases(data);
+      if (data) setThreats(data);
     };
 
-    fetchCases();
+    fetchThreats();
 
     const channel = supabase
-      .channel('cases-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cases' }, () => {
-        fetchCases();
+      .channel('threat-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'threat_patterns' }, () => {
+        fetchThreats();
       })
       .subscribe();
 
@@ -44,37 +42,37 @@ export default function RecentCases() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Cases</CardTitle>
+        <CardTitle>Recent Threats</CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px] pr-4">
           <div className="space-y-4">
-            {cases.map((case_) => (
+            {threats.map((threat) => (
               <div
-                key={case_.id}
+                key={threat.id}
                 className="flex flex-col space-y-2 p-4 border rounded-lg"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{case_.establishments?.name}</h3>
+                  <h3 className="font-semibold">{threat.threat_type}</h3>
                   <Badge
                     variant={
-                      case_.status === 'confirmed'
+                      threat.severity === 'critical'
                         ? "destructive"
-                        : case_.status === 'suspected'
+                        : threat.severity === 'high'
                         ? "secondary"
                         : "outline"
                     }
                   >
-                    {case_.status}
+                    {threat.severity}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {format(new Date(case_.report_date), 'PPP')}
+                  {format(new Date(threat.created_at), 'PPP')}
                 </p>
                 <div className="flex gap-2">
-                  {case_.symptoms?.map((symptom) => (
-                    <Badge key={symptom} variant="outline">
-                      {symptom}
+                  {threat.affected_regions?.map((region) => (
+                    <Badge key={region} variant="outline">
+                      {region}
                     </Badge>
                   ))}
                 </div>

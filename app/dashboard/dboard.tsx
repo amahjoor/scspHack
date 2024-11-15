@@ -1,8 +1,8 @@
 import DashboardHeader from '@/components/dashboard/header';
 import AlertsOverview from '@/components/dashboard/alerts-overview';
-import CasesTrend from '@/components/dashboard/cases-trend';
-import EstablishmentMap from '@/components/dashboard/establishment-map';
-import RecentCases from '@/components/dashboard/recent-cases';
+import ThreatTrends from '@/components/dashboard/threat-trends';
+import RegionalMap from '@/components/dashboard/regional-map';
+import RecentThreats from '@/components/dashboard/recent-threats';
 import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 0;
@@ -10,16 +10,20 @@ export const revalidate = 0;
 async function getStats() {
   const supabase = createClient();
   
-  const [alertsCount, totalCases, establishmentsCount] = await Promise.all([
-    supabase.from('alerts').select('*', { count: 'exact' }),
-    supabase.from('cases').select('*', { count: 'exact' }),
-    supabase.from('establishments').select('*', { count: 'exact' }),
+  const [alertsCount, threatCount, regionsCount] = await Promise.all([
+    supabase.from('alerts')
+      .select('*', { count: 'exact' })
+      .eq('status', 'active'),
+    supabase.from('threat_patterns')
+      .select('*', { count: 'exact' }),
+    supabase.from('osint_sources')
+      .select('affected_regions', { count: 'exact' }),
   ]);
 
   return {
     activeAlerts: alertsCount.count || 0,
-    totalCases: totalCases.count || 0,
-    establishments: establishmentsCount.count || 0,
+    totalThreats: threatCount.count || 0,
+    monitoredRegions: regionsCount.count || 0,
   };
 }
 
@@ -33,14 +37,14 @@ export default async function DashboardPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AlertsOverview />
-          <CasesTrend />
+          <ThreatTrends />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <EstablishmentMap />
+            <RegionalMap />
           </div>
-          <RecentCases />
+          <RecentThreats />
         </div>
       </div>
     </main>

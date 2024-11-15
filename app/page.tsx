@@ -28,12 +28,12 @@ export default function LandingPage() {
           {/* Main Headline */}
           <div className="space-y-4 max-w-3xl">
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-              Monitor Food Safety{' '}
+              Monitor Global Threats{' '}
               <span className="bg-gradient-to-r from-chart-1 to-chart-2 text-transparent bg-clip-text">In Real-Time</span>
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Protect your customers and brand with AI-powered outbreak detection. Get alerts before issues escalate.
+              AI-powered OSINT platform for tracking global threats, disinformation campaigns, and emerging security risks.
             </p>
           </div>
 

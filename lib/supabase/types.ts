@@ -1,113 +1,45 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
-export interface Database {
+export type Database = {
   public: {
     Tables: {
-      establishments: {
+      threat_patterns: {
         Row: {
-          id: number
-          name: string
-          address: string
-          city: string
-          state: string
-          postal_code: string
-          latitude: number | null
-          longitude: number | null
-          created_at: string
-        }
-        Insert: {
-          id?: never
-          name: string
-          address: string
-          city: string
-          state: string
-          postal_code: string
-          latitude?: number | null
-          longitude?: number | null
-          created_at?: string
-        }
-        Update: {
-          id?: never
-          name?: string
-          address?: string
-          city?: string
-          state?: string
-          postal_code?: string
-          latitude?: number | null
-          longitude?: number | null
-          created_at?: string
-        }
-      }
-      cases: {
+          id: string;
+          threat_type: 'disinformation' | 'cyber' | 'physical' | 'economic';
+          confidence: number;
+          severity: 'low' | 'medium' | 'high' | 'critical';
+          analysis: string;
+          affected_regions: string[];
+          created_at: string;
+        };
+      };
+      osint_sources: {
         Row: {
-          id: number
-          establishment_id: number | null
-          report_date: string
-          onset_date: string | null
-          symptoms: string[] | null
-          foods_consumed: string[] | null
-          patient_count: number | null
-          status: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: never
-          establishment_id?: number | null
-          report_date: string
-          onset_date?: string | null
-          symptoms?: string[] | null
-          foods_consumed?: string[] | null
-          patient_count?: number | null
-          status?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: never
-          establishment_id?: number | null
-          report_date?: string
-          onset_date?: string | null
-          symptoms?: string[] | null
-          foods_consumed?: string[] | null
-          patient_count?: number | null
-          status?: string | null
-          created_at?: string
-        }
-      }
+          id: string;
+          source_type: 'social_media' | 'news' | 'government' | 'technical';
+          credibility: 'low' | 'medium' | 'high';
+          content: string;
+          language: string;
+          metadata: Record<string, any>;
+          threat_pattern_id: string;
+          created_at: string;
+        };
+      };
       alerts: {
         Row: {
-          id: number
-          establishment_id: number | null
-          alert_type: string
-          severity: string
-          case_count: number
-          details: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: never
-          establishment_id?: number | null
-          alert_type: string
-          severity: string
-          case_count: number
-          details?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: never
-          establishment_id?: number | null
-          alert_type?: string
-          severity?: string
-          case_count?: number
-          details?: string | null
-          created_at?: string
-        }
-      }
-    }
-  }
-}
+          id: string;
+          alert_type: 'emerging' | 'active' | 'resolved';
+          severity: 'low' | 'medium' | 'high' | 'critical';
+          details: string;
+          affected_regions: string[];
+          recommendations: string;
+          created_at: string;
+        };
+      };
+    };
+  };
+};
+
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+export type ThreatPattern = Tables<'threat_patterns'>;
+export type OSINTSource = Tables<'osint_sources'>;
+export type Alert = Tables<'alerts'>;

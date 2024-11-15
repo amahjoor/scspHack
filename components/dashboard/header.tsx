@@ -1,11 +1,11 @@
-import { AlertTriangle, TrendingUp, Utensils } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Globe } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface DashboardHeaderProps {
   stats: {
     activeAlerts: number;
-    totalCases: number;
-    establishments: number;
+    totalThreats: number;
+    monitoredRegions: number;
   };
 }
 
@@ -13,7 +13,7 @@ export default function DashboardHeader({ stats }: DashboardHeaderProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Foodborne Outbreak Monitor</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Threat Intelligence Dashboard</h1>
         <div className="flex items-center space-x-4">
           <span className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleString()}</span>
         </div>
@@ -33,8 +33,8 @@ export default function DashboardHeader({ stats }: DashboardHeaderProps) {
         <Card>
           <CardContent className="flex items-center justify-between p-6">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Total Cases</p>
-              <p className="text-2xl font-bold">{stats.totalCases}</p>
+              <p className="text-sm font-medium text-muted-foreground">Total Threats</p>
+              <p className="text-2xl font-bold">{stats.totalThreats}</p>
             </div>
             <TrendingUp className="h-6 w-6 text-primary" />
           </CardContent>
@@ -43,10 +43,10 @@ export default function DashboardHeader({ stats }: DashboardHeaderProps) {
         <Card>
           <CardContent className="flex items-center justify-between p-6">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Establishments</p>
-              <p className="text-2xl font-bold">{stats.establishments}</p>
+              <p className="text-sm font-medium text-muted-foreground">Monitored Regions</p>
+              <p className="text-2xl font-bold">{stats.monitoredRegions}</p>
             </div>
-            <Utensils className="h-6 w-6 text-primary" />
+            <Globe className="h-6 w-6 text-primary" />
           </CardContent>
         </Card>
       </div>
