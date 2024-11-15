@@ -21,7 +21,7 @@ export default function LandingPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chart-1 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-1"></span>
             </span>
-            <span>Monitoring 10,000+ locations worldwide</span>
+            <span>Ensuring SafeBytes worldwide</span>
             <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
           </div>
           
